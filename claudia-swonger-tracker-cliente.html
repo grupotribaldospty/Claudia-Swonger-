@@ -1,0 +1,725 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Property Tracker — Claudia Swonger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bay:#1b3a5c; --bay-deep:#0d1f33; --sand:#f2f4f7; --sand-card:#ffffff;
+    --ink:#1a2430; --muted:#6b7686; --line:#dde2e9;
+    --green:#2f7d4f; --green-bg:#e3f1e6; --amber:#9a6a16; --amber-bg:#fbf0d7;
+    --red:#a33636; --red-bg:#f7e1de; --slate:#3a5566; --slate-bg:#e2ebf0;
+    --shadow:0 1px 2px rgba(13,31,51,.06),0 6px 24px rgba(13,31,51,.08);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter',system-ui,sans-serif;background:var(--sand);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:var(--bay);text-underline-offset:2px}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+  header{background:linear-gradient(135deg,#20477a 0%,#0d1f33 100%);color:#fdfbf5;padding:20px 0 30px}
+  .header-brand{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+  .header-brand svg{height:44px;width:auto}
+  .header-inner{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;flex-wrap:wrap}
+  .header-left{flex:1;min-width:260px}
+  .eyebrow{font-size:11px;letter-spacing:.16em;text-transform:uppercase;opacity:.8;font-weight:500}
+  h1{font-family:'Fraunces',serif;font-weight:500;font-size:clamp(24px,3.5vw,34px);line-height:1.05;margin:4px 0 0}
+  .stats{display:flex;gap:22px}
+  .stat{text-align:center}
+  .stat .n{font-family:'Fraunces',serif;font-size:24px;line-height:1}
+  .stat .l{font-size:10.5px;opacity:.78;letter-spacing:.03em;margin-top:2px;white-space:nowrap}
+  .note-box{background:#fbf4e4;border:1px solid #ecdcb5;border-radius:12px;padding:14px 16px;margin:18px auto 0;font-size:13px;color:#5a4a22;line-height:1.55}
+  .note-box b{color:var(--amber)}
+  .controls{background:var(--sand-card);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);padding:16px;margin:16px auto 22px}
+  .controls-row{display:flex;gap:12px;flex-wrap:wrap;align-items:flex-end}
+  .controls-row + .controls-row{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+  .field{display:flex;flex-direction:column;gap:4px;flex:1 1 150px;min-width:130px}
+  .field label{font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+  select,input[type=search]{font:inherit;font-size:13.5px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:#fff;color:var(--ink)}
+  select:focus,input:focus{outline:2px solid var(--bay);outline-offset:1px}
+  .clear{font:inherit;font-size:13px;background:none;border:none;color:var(--bay);cursor:pointer;padding:8px;text-decoration:underline;white-space:nowrap}
+  .zone-block{margin-top:8px}
+  .sec-head{display:flex;align-items:baseline;gap:12px;margin:30px 0 16px}
+  .sec-head h2{font-family:'Fraunces',serif;font-weight:500;font-size:22px}
+  .sec-head .meta{font-size:13px;color:var(--muted);white-space:nowrap}
+  .rule{height:1px;background:var(--line);flex:1}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px}
+  .card{background:var(--sand-card);border:1px solid var(--line);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);display:flex;flex-direction:column;transition:transform .15s ease,box-shadow .15s ease}
+  .card:hover{transform:translateY(-3px);box-shadow:0 8px 30px rgba(18,40,38,.12)}
+  .thumb{height:170px;background:#dfe6e2 center/cover no-repeat;position:relative}
+  .verdict-tag{position:absolute;top:10px;left:10px;font-size:11.5px;font-weight:700;letter-spacing:.02em;padding:5px 12px;border-radius:99px;color:#fff}
+  .v-great{background:var(--green)} .v-solid{background:var(--bay)} .v-fair{background:var(--amber)} .v-stretch{background:var(--slate)}
+  .fav-btn{position:absolute;top:10px;right:10px;background:rgba(255,253,248,.95);border:none;border-radius:99px;min-width:34px;height:34px;padding:0 10px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:var(--shadow);color:#c2456b;display:flex;align-items:center;justify-content:center;gap:4px}
+  .fav-btn.on{background:#c2456b;color:#fff}
+  .source-tag{position:absolute;bottom:10px;right:10px;background:rgba(255,253,248,.92);border-radius:99px;padding:3px 10px;font-size:10.5px;font-weight:600;color:var(--muted)}
+  .card-body{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;flex:1}
+  .card h3{font-family:'Fraunces',serif;font-weight:500;font-size:18px;line-height:1.2}
+  .area{font-size:13px;color:var(--muted)}
+  .price{font-family:'Fraunces',serif;font-size:22px;font-weight:600;color:var(--bay-deep)}
+  .ppm{font-size:11.5px;color:var(--muted);margin-left:6px}
+  .facts{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px;padding:8px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .facts b{font-weight:600}
+  .desc{font-size:12.5px;color:var(--ink);line-height:1.55}
+  .desc.clamped{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .desc-toggle{font:inherit;font-size:12px;font-weight:600;background:none;border:none;color:var(--bay);cursor:pointer;padding:0;text-align:left}
+  .considerations{background:#fbf4e4;border:1px solid #ecdcb5;border-radius:9px;padding:9px 11px;font-size:12.5px;color:#5a4a22}
+  .considerations b{display:block;font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;color:var(--amber);margin-bottom:4px}
+  .considerations ul{margin:0 0 0 16px}
+  .considerations li{margin:2px 0}
+  .maint{font-size:12px;color:var(--muted)}
+  .agent-badge{font-size:11.5px;color:var(--bay-deep);font-weight:600;background:var(--sand);border-radius:7px;padding:5px 9px;display:inline-block}
+  .card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:auto;padding-top:11px;border-top:1px solid var(--line)}
+  .ref-badge{font-size:12px;font-weight:600;color:var(--muted)!important;background:var(--sand);border:1px solid var(--line);border-radius:7px;padding:5px 10px;text-decoration:none!important}
+  .updated{font-size:11.5px;color:var(--muted)}
+  footer{text-align:center;color:var(--muted);font-size:12.5px;padding:34px 20px 16px;line-height:1.7}
+  .brand-footer{max-width:640px;margin:26px auto 0;padding-top:22px;border-top:1px solid var(--line);text-align:center}
+  .brand-name{font-family:'Fraunces',serif;font-size:17px;font-weight:600;color:var(--bay-deep);letter-spacing:.01em}
+  .brand-tag{font-size:12.5px;color:var(--muted);margin-top:6px;line-height:1.6;max-width:520px;margin-left:auto;margin-right:auto}
+  .brand-foot-small{font-size:11px;color:var(--muted);opacity:.75;margin-top:14px}
+  .empty{background:var(--sand-card);border:1px dashed var(--line);border-radius:14px;padding:38px 24px;text-align:center;color:var(--muted)}
+  @media(max-width:640px){.controls{padding:12px}}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <div class="header-brand">
+      <svg viewBox="0 0 720 260" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Grupo Tribaldos Realtors">
+        <text x="130" y="108" font-family="Georgia,'Times New Roman',serif" font-size="42" font-weight="700" fill="#fdfbf5">Grupo</text>
+        <text x="85" y="185" font-family="Arial,Helvetica,sans-serif" font-size="92" font-weight="800" letter-spacing="-1" fill="#fdfbf5">TRIBALDOS</text>
+        <text x="618" y="140" font-family="Arial,Helvetica,sans-serif" font-size="20" font-weight="700" fill="#fdfbf5">®</text>
+        <text x="428" y="232" font-family="Georgia,'Times New Roman',serif" font-size="46" font-weight="700" fill="#fdfbf5">Realtors</text>
+        <path d="M348 15c-20 0-36 16-36 36 0 27 36 68 36 68s36-41 36-68c0-20-16-36-36-36z" fill="#c0392b"/>
+        <circle cx="348" cy="51" r="19" fill="#6e2233"/>
+      </svg>
+    </div>
+    <div class="header-inner">
+      <div class="header-left">
+        <div class="eyebrow">Ciudad de Panamá · Cliente: Claudia Swonger · Asesora: Isabella Tribaldos</div>
+        <h1>Property Tracker</h1>
+      </div>
+      <div class="stats" id="stats"></div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="note-box">
+    <b>Nota:</b> apartamentos de 2+ recámaras y balcón (indispensable), en San Francisco, Coco del Mar, El Cangrejo, Marbella, Obarrio y Costa del Este. Presupuesto de referencia $250,000, con algunas opciones por encima cuando el perfil es sólido. <b>Vista al mar:</b> aplica en San Francisco, Coco del Mar, Marbella y Costa del Este (zonas costeras); en El Cangrejo y Obarrio no se exige, ya que son zonas del interior de la ciudad — ahí filtramos por recámaras, balcón y presupuesto. <b>Sobre Cabo Marzo:</b> hicimos una búsqueda exhaustiva y por ahora no encontramos ningún anuncio activo para ese proyecto — seguimos buscando y nos encantaría que nos compartas más detalles (zona exacta o desarrollador) para ubicarlo más rápido. Todas las propiedades incluidas fueron verificadas individualmente y la fecha de actualización es reciente (verificado el 23/09/2026).
+  </div>
+
+  <div class="controls">
+    <div class="controls-row">
+      <div class="field"><label>Buscar</label>
+        <input type="search" id="f-search" placeholder="Apartamento, zona...">
+      </div>
+      <div class="field"><label>Zona</label>
+        <select id="f-area"><option value="">Todas</option></select>
+      </div>
+      <div class="field"><label>Precio</label>
+        <select id="f-price">
+          <option value="">Cualquiera</option>
+          <option value="0-225000">Hasta $225K</option>
+          <option value="225000-260000">$225K–$260K</option>
+          <option value="260000-300000">$260K–$300K</option>
+          <option value="300000-400000">$300K en adelante</option>
+        </select>
+      </div>
+      <div class="field"><label>Recámaras</label>
+        <select id="f-beds"><option value="">Cualquiera</option><option value="2">2+</option><option value="3">3+</option></select>
+      </div>
+      <div class="field"><label>Veredicto</label>
+        <select id="f-verdict">
+          <option value="">Cualquiera</option>
+          <option value="Great Find">Great Find</option>
+          <option value="Solid Option">Solid Option</option>
+          <option value="Stretch">Stretch</option>
+        </select>
+      </div>
+      <div class="field"><label>Edificio</label>
+        <select id="f-building"><option value="">Cualquiera</option></select>
+      </div>
+    </div>
+    <div class="controls-row">
+      <div class="field"><label>Mostrar</label>
+        <select id="f-show"><option value="all">Todo</option><option value="loved">Solo con favoritos</option></select>
+      </div>
+      <div class="field"><label>Ordenar por</label>
+        <select id="f-sort">
+          <option value="price-asc">Precio (menor a mayor)</option>
+          <option value="price-desc">Precio (mayor a menor)</option>
+          <option value="size-desc">Tamaño (mayor a menor)</option>
+          <option value="name-asc">Nombre (A-Z)</option>
+        </select>
+      </div>
+      <button class="clear" id="clear">Limpiar filtros</button>
+    </div>
+  </div>
+
+  <div id="zones"></div>
+  <div class="empty" id="empty" hidden><b>Sin resultados</b>Prueba ajustando los filtros.</div>
+</div>
+
+<footer>
+  Datos tomados de listados públicos activos en los portales inmobiliarios, verificados el 23/09/2026 · Los precios y disponibilidad pueden cambiar — verifica siempre en el link original antes de contactar.<br>
+  ❤ los favoritos se comparten con todos los que abren este link.
+
+  <div class="brand-footer">
+    <div class="brand-name">Grupo Tribaldos</div>
+    <div class="brand-tag">Este tracker es un sistema de filtrado sobre todo el inventario disponible en el mercado: revisamos, verificamos y comparamos las opciones activas para que el cliente pueda enfocarse solo en las que realmente valen la pena, en vez de buscar anuncio por anuncio.</div>
+    <div class="brand-foot-small">Preparado para Claudia Swonger · Asesora Isabella Tribaldos</div>
+  </div>
+</footer>
+
+<script>
+const SUPABASE_URL = "https://saqtricsftsfwxrpkewx.supabase.co";
+const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNhcXRyaWNzZnRzZnd4cnBrZXd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODQwNDU0MTEsImV4cCI6MjA5OTYyMTQxMX0.q2qvhqrbS24qKiLNTj92eTtNYmhz_Y7gZXgjucAJkXU";
+
+// Prefijo único para este cliente para que sus favoritos no se mezclen
+// con los de otros trackers que comparten la misma tabla de Supabase.
+const CLIENT_PREFIX = "swonger-";
+
+// Orden de las zonas tal como el cliente las pidió (El Cangrejo y Obarrio
+// no tuvieron opciones calificadas, así que simplemente no aparecerán).
+const ZONE_ORDER = ["San Francisco", "Coco del Mar", "El Cangrejo", "Marbella", "Obarrio", "Costa del Este"];
+
+const PROPERTIES = [
+  // ---------- SAN FRANCISCO (Punta Pacífica) ----------
+  {
+    id:CLIENT_PREFIX+"ph-mystic-point",
+    building:"PH Mystic Point",
+    area:"San Francisco",
+    price:280000, beds:3, baths:3, parking:2, size_m2:165,
+    maintenance:247.5,
+    verdict:"Solid Option",
+    description:"Apartamento amoblado en piso alto de PH Mystic Point, Punta Pacífica, San Francisco, con bonita vista al mar. Cuenta con 3 recámaras, 3 baños, cocina amplia, lavandería, sala-comedor, cuarto y baño de empleada, 2 estacionamientos, balcón y aire acondicionado tipo split.",
+    considerations:["165 m² construidos — $1,697/m²","Vista al mar y balcón confirmados en el anuncio","Actualizado el 23/09/2026","2 estacionamientos, amoblado"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/07/41/04/32074104_0a265388c3361ecd60a68eeda6413b02-b38f93d",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/vendo-ph-mystic-point/32074104",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"punta-pacifica-210",
+    building:"Apartamento en Punta Pacífica (210 m²)",
+    area:"San Francisco",
+    price:290000, beds:3, baths:2.5, parking:2, size_m2:210,
+    maintenance:297,
+    verdict:"Solid Option",
+    description:"Apartamento de 210 m² en Punta Pacífica, San Francisco, con excelente distribución y espacios amplios. Incluye 3 recámaras, 2.5 baños, cocina cerrada con espacios extra, cuarto y baño de servicio, balcón con vista al mar, 2 estacionamientos y un depósito.",
+    considerations:["210 m² construidos — $1,381/m²","Vista al mar y balcón confirmados","Actualizado el 23/09/2026","2 estacionamientos y depósito"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/88/00/07/32880007_7c3384a5d4c15787f65cdd2311ab3b4b-f9e9b39",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/oportunidad-vendo-apartamento-de-210-mts-en-punta-pacifica/32880007",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"ph-costa-pacifica-torre300",
+    building:"PH Costa Pacífica Torre 300",
+    area:"San Francisco",
+    price:310000, beds:3, baths:3.5, parking:2, size_m2:215,
+    maintenance:300,
+    verdict:"Solid Option",
+    description:"Amplio apartamento de 215 m² en la Torre 300 de PH Costa Pacífica, Punta Pacífica, San Francisco. Cuenta con 3 recámaras, 3 baños completos, recámara principal con jacuzzi, balcón con vista al mar, cocina equipada, cuarto y baño de servicio, y 2 estacionamientos.",
+    considerations:["215 m² construidos — $1,442/m²","Vista al mar y balcón confirmados","Actualizado el 23/09/2026","2 estacionamientos, recámara principal con jacuzzi, mantenimiento $300/mes (justo en el tope)"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/06/66/86/32066686_c1098f3f965b79471158abc537b4ebb6-337cfdb",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/ph-costa-pacifica-torre-300-apartamento-en-venta-vista-al-mar/32066686",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"ph-ocean-drive",
+    building:"PH Ocean Drive",
+    area:"San Francisco",
+    price:350000, beds:3, baths:3.5, parking:2, size_m2:220,
+    maintenance:400,
+    verdict:"Stretch",
+    description:"Apartamento amplio en PH Ocean Drive, Punta Pacífica, San Francisco, con espectacular vista al mar desde el balcón. Incluye 3 habitaciones, 3.5 baños, den abierto, cocina cerrada, área de lavandería, cuarto y baño de servicio, y 2 estacionamientos, en excelente estado de conservación.",
+    considerations:["220 m² construidos — $1,591/m², buen precio por m² para el tamaño","Precio ($350K) y mantenimiento ($400/mes) por encima del presupuesto de referencia — se incluye por el tamaño y la vista","Actualizado el 22/09/2026","2 estacionamientos, den adicional"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/92/79/47/32927947_154fa6e5723479ad13c61de8cce4e3c0-a3849d3",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/se-vende-apartamento-con-vista-al-mar-ph-ocean-drive-punta-pacifica/32927947",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+
+  // ---------- COCO DEL MAR ----------
+  {
+    id:CLIENT_PREFIX+"5cero4",
+    building:"Proyecto 5CERO4 (preventa)",
+    area:"Coco del Mar",
+    price:280000, beds:2, baths:2, parking:1, size_m2:84,
+    maintenance:147,
+    verdict:"Solid Option",
+    description:"Apartamento en preventa dentro de un nuevo proyecto residencial en Coco del Mar, cerca de la salida al Corredor Sur. Cuenta con 2 recámaras, cocina abierta con isla y balcón con vista al mar y a la ciudad. El edificio ofrecerá más de 2,000 m² de áreas sociales, incluyendo piscina semiolímpica, gimnasio y coworking.",
+    considerations:["84 m² construidos — $3,333/m²","Proyecto en preventa, entrega estimada finales de 2026 — no es una unidad de reventa inmediata","Vista al mar y balcón confirmados","Actualizado el 23/09/2026, mantenimiento estimado $147/mes"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/10/10/00/32101000_e130a90",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/apartamento-a-estrenar-en-coco-del-mar/32101000",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"coco-del-mar-140",
+    building:"Apartamento en Coco del Mar (140 m²)",
+    area:"Coco del Mar",
+    price:285000, beds:2, baths:3, parking:2, size_m2:140,
+    maintenance:270,
+    verdict:"Solid Option",
+    description:"Amplio apartamento de 140 m² en piso alto (sobre el piso 36) en un edificio consolidado de Coco del Mar, a pasos del Coco Park. Tiene habitación principal con baño, habitación secundaria con baño privado, cuarto y baño de empleada, balcón con vista al mar y dos estacionamientos.",
+    considerations:["140 m² construidos — $2,036/m²","Vista al mar y balcón confirmados, piso alto (sobre piso 36)","Actualizado el 18/09/2026","2 estacionamientos, cerca de Coco Park"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/92/60/13/32926013_28fdbe6",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/en-coco-del-mar-140-m2-vista-al-mar/32926013",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"ph-dovle-1",
+    building:"PH Dovle Cincuentenario",
+    area:"Coco del Mar",
+    price:309000, beds:2, baths:2, parking:1, size_m2:68,
+    maintenance:null,
+    verdict:"Solid Option",
+    description:"Loft de doble altura en PH Dovle Cincuentenario, uno de los proyectos más reconocidos de Coco del Mar. Tiene 2 recámaras, 2 baños, ventanales de piso a techo, un espacio de home office integrado en el entrepiso y balcón con vista al mar.",
+    considerations:["68 m² construidos — $4,544/m², el más alto por m² del grupo, propio de un loft de diseño","Vista al mar y balcón confirmados","Actualizado el 09/09/2026","1 estacionamiento, formato loft de doble altura"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/90/25/65/32902565_a7e70707541686547a7eec53482e8f2b-e0fdc1b",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/ph-dovle-2-habitaciones-2-banos-balcon-coco-del-mar/32902565",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"ph-dovle-2",
+    building:"PH Dovle Cincuentenario (rentado)",
+    area:"Coco del Mar",
+    price:320000, beds:2, baths:2, parking:1, size_m2:68,
+    maintenance:null,
+    verdict:"Stretch",
+    description:"Apartamento amoblado y decorado por diseñadora de interiores en PH Dovle Cincuentenario, Coco del Mar, actualmente rentado (ideal para inversionista). Cuenta con 2 recámaras, 2 baños, balcón con vista al mar y un estacionamiento. El edificio de 15 pisos incluye piscina tipo playa, gimnasio, área de yoga y coworking.",
+    considerations:["68 m² construidos — $4,706/m²","Precio ($320K) por encima del presupuesto de referencia — se incluye por su fuerte perfil (mismo edificio que el anterior, amoblado)","Actualmente alquilado — relevante si el objetivo es ocupación inmediata en vez de inversión","Actualizado el 14/09/2026"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/89/11/39/32891139_e478da008c86952449272d0f5e06e6e0-03ffc57",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/venta-de-apartamento-en-ph-dovle-coco-del-mar-2/32891139",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+
+  // ---------- MARBELLA ----------
+  {
+    id:CLIENT_PREFIX+"ph-grandbay-tower",
+    building:"PH Grandbay Tower (Avenida Balboa)",
+    area:"Marbella",
+    price:260000, beds:2, baths:2, parking:1, size_m2:138.3,
+    maintenance:180,
+    verdict:"Great Find",
+    description:"Apartamento amueblado sobre la Avenida Balboa, en Marbella, con espectacular vista al mar y a pasos de la Cinta Costera. Tiene 2 recámaras, 2 baños y un estacionamiento, con acabados de calidad y buena distribución.",
+    considerations:["138.3 m² construidos — $1,880/m²","Vista al mar y balcón confirmados, sobre la Avenida Balboa","Actualizado el 22/09/2026","1 estacionamiento, mantenimiento $180/mes, amueblado — la opción más cercana al presupuesto de $250,000"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/31/03/22/49/31032249_581954",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/apartamento-en-venta-ph-grandbay-tower-avenida-balboa-vista-al-mar/31032249",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+
+  // ---------- COSTA DEL ESTE ----------
+  {
+    id:CLIENT_PREFIX+"ph-sevilla-1",
+    building:"PH Sevilla",
+    area:"Costa del Este",
+    price:332000, beds:3, baths:3.5, parking:2, size_m2:188,
+    maintenance:295,
+    verdict:"Stretch",
+    description:"Apartamento remodelado de 188 m² en PH Sevilla, Costa del Este, con 3 recámaras, 3.5 baños, cuarto y baño de empleada, 2 estacionamientos y depósito. Cuenta con balcón con vista directa al mar, línea blanca y aires acondicionados.",
+    considerations:["188 m² construidos — $1,766/m²","Precio por encima del presupuesto de referencia, pero una de las mejores relaciones precio/m² con vista al mar de la zona","Vista al mar y balcón confirmados, remodelado","Actualizado el 14/09/2026"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/31/99/56/24/31995624_cd21ae2553f171bb0c733019637c32bd-50fb67a",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/apartamento-en-venta-en-costa-del-este-ph-sevilla-linea-blanca-vista-al-mar/31995624",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"ph-sevilla-2",
+    building:"PH Sevilla (balcón doble)",
+    area:"Costa del Este",
+    price:355000, beds:3, baths:3.5, parking:2, size_m2:198,
+    maintenance:312,
+    verdict:"Stretch",
+    description:"Amplio apartamento de 198 m² distribuido en 2 niveles dentro de PH Sevilla, Costa del Este, con 3 recámaras, 3.5 baños, den familiar, cuarto y baño de empleada, depósito y 2 estacionamientos. Cuenta con 2 balcones con acceso desde sala, comedor y la recámara principal, con vista al mar.",
+    considerations:["198 m² construidos — $1,793/m²","Precio y mantenimiento por encima del presupuesto de referencia — se incluye por los dos balcones y la vista al mar confirmada","Actualizado el 19/08/2026 — algo menos reciente, confirmar disponibilidad","2 estacionamientos, den familiar, distribuido en 2 niveles"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_m/f_auto/v1/pa/31/29/92/02/31299202_9b3a97",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/venta-de-amplio-apartamento-y-balcon-doble-en-sevilla-costa-del-este/31299202",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"ph-the-regent",
+    building:"PH The Regent",
+    area:"Costa del Este",
+    price:370000, beds:2, baths:2, parking:1, size_m2:105,
+    maintenance:196,
+    verdict:"Stretch",
+    description:"Apartamento de 105 m² en PH The Regent, Costa del Este, completamente amoblado con decoración de diseñador y listo para ocupar. Cuenta con 2 recámaras, 2 baños, balcón y vista al mar, ideal como residencia o inversión para alquiler.",
+    considerations:["105 m² construidos — $3,524/m², el más alto por m² del grupo","Precio por encima del presupuesto de referencia — el más caro del grupo, aunque el más pequeño en tamaño","Vista al mar y balcón confirmados, amoblado con decoración de diseñador","Actualizado el 22/09/2026"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_m/f_auto/v1/pa/32/90/21/72/32902172_3bd43616bce8166a1f259e2ae8c15d45-09e957b",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/ph-the-regent-apartamento-en-venta-inversion-vista-al-mar-amoblado/32902172",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+
+  // ---------- EL CANGREJO (sin vista al mar — zona interior, criterio no aplica aquí) ----------
+  {
+    id:CLIENT_PREFIX+"cangrejo-alberto-navarro",
+    building:"Apartamento en El Cangrejo (Calle Alberto Navarro)",
+    area:"El Cangrejo",
+    price:195000, beds:3, baths:3, parking:2, size_m2:120,
+    maintenance:200,
+    verdict:"Great Find",
+    description:"Amplio apartamento de 3 habitaciones en El Cangrejo, con cuarto y baño de empleada, línea blanca, aires acondicionados inverter y balcón. El edificio cuenta con seguridad 24 horas, área social con piscina y barbacoa.",
+    considerations:["120 m² construidos — $1,625/m², la mejor relación precio/m² del grupo en esta zona","Balcón confirmado","Actualizado el 22/09/2026","2 estacionamientos, buen precio bajo el presupuesto de referencia"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/31/88/73/03/31887303_0cfe033",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/el-cangrejo-vendo-amplio-apartamento-de-3-habitaciones/31887303",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"luxor-tower",
+    building:"Luxor Tower",
+    area:"El Cangrejo",
+    price:218000, beds:3, baths:2, parking:2, size_m2:126,
+    maintenance:250,
+    verdict:"Great Find",
+    description:"Apartamento estratégicamente ubicado en El Cangrejo, cerca de restaurantes, supermercados, centros comerciales y colegios. Cuenta con balcón con baño completo, cortinas roller y aire acondicionado tipo split.",
+    considerations:["126 m² construidos — $1,730/m²","Balcón confirmado","Actualizado el 20/09/2026","2 estacionamientos, cerca de comercios y colegios"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/25/36/76/96/25367696_3249aa",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/venta-de-apartamento-en-el-cangrejo-luxor-tower/25367696",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"ph-raphin",
+    building:"PH Raphin",
+    area:"El Cangrejo",
+    price:250000, beds:3, baths:2, parking:2, size_m2:245,
+    maintenance:150,
+    verdict:"Great Find",
+    description:"Exclusivo apartamento de un solo piso por edificio en PH Raphin, El Cangrejo, con amplitud y privacidad poco comunes. Cuenta con sala, comedor, sala familiar, cocina amplia, cuarto y baño de servicio, dos balcones y terraza. Ubicado cerca de supermercados, restaurantes, universidades y la estación del Metro.",
+    considerations:["245 m² construidos — $1,020/m², el precio por m² más bajo de todo el grupo","Dos balcones confirmados, un solo apartamento por piso","Actualizado el 14/07/2026 — algo menos reciente que el resto, se recomienda confirmar disponibilidad","2 estacionamientos, cerca de la estación del Metro"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/64/97/79/32649779_9b6a753a37d50b4204ac217e673f664f-96a9310",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/apartamento-en-venta-ph-raphin-el-cangrejo/32649779",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"cangrejo-via-argentina-4bed",
+    building:"Apartamento en El Cangrejo (Vía Argentina, 4 rec)",
+    area:"El Cangrejo",
+    price:235000, beds:4, baths:3, parking:1, size_m2:201,
+    maintenance:null,
+    verdict:"Solid Option",
+    description:"Amplio apartamento de 4 recámaras en El Cangrejo, zona céntrica y segura, con sala-comedor de excelente iluminación, cocina con amplios gabinetes, balcón amplio, portón eléctrico y elevador.",
+    considerations:["201 m² construidos — $1,169/m², una recámara adicional a lo pedido","Balcón amplio confirmado","Actualizado el 21/09/2026","Solo 1 estacionamiento — menor a lo habitual en el grupo"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/33/22/17/32332217_ee77f59",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/se-vende-amplio-apto-en-el-cangrejo/32332217",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"ph-cangrejo-i",
+    building:"PH Cangrejo I",
+    area:"El Cangrejo",
+    price:250000, beds:3, baths:3, parking:2, size_m2:123,
+    maintenance:209,
+    verdict:"Solid Option",
+    description:"Apartamento de lujo totalmente amoblado con 3 recámaras con aire acondicionado, cuarto y baño de servicio, balcón con vista y depósito incluido. Amplia sala-comedor con excelente iluminación. El edificio ofrece piscina para adultos y niños, gimnasio, jacuzzi, sauna, salón de eventos y seguridad 24/7.",
+    considerations:["123 m² construidos — $2,033/m², amoblado","Balcón confirmado","Actualizado el 22/09/2026","2 estacionamientos y depósito incluido"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/95/61/63/32956163_174ced20a17b2ead4f08481ccdd4a9ce-b0fd95e",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/apartamento-en-el-cangrejo-i-con-balcon-y-deposito/32956163",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"cangrejo-via-argentina",
+    building:"Apartamento en El Cangrejo (Vía Argentina)",
+    area:"El Cangrejo",
+    price:320000, beds:3, baths:2, parking:2, size_m2:118,
+    maintenance:236,
+    verdict:"Stretch",
+    description:"Apartamento moderno en El Cangrejo con cocina semi abierta y amplio balcón con vista a la ciudad. El edificio ofrece lobby y seguridad 24 horas, piscina, gimnasio, sauna, jacuzzi, sky lounge y co-working.",
+    considerations:["118 m² construidos — $2,712/m², el más caro por m² del grupo en esta zona","Balcón confirmado","Actualizado el 14/09/2026","2 estacionamientos, precio por encima del presupuesto de referencia"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/62/09/76/32620976_a4cbb4b",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/venta-el-cangrejo/32620976",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+
+  // ---------- OBARRIO (sin vista al mar — zona interior, criterio no aplica aquí) ----------
+  {
+    id:CLIENT_PREFIX+"ph-monaco",
+    building:"PH Monaco",
+    area:"Obarrio",
+    price:225000, beds:3, baths:2, parking:2, size_m2:151,
+    maintenance:223,
+    verdict:"Great Find",
+    description:"Amplio apartamento de un solo piso por edificio en PH Monaco, torre residencial de baja densidad (solo 2 unidades por piso, 36 apartamentos en total) frente al Hotel Sortis en Obarrio. Cuenta con terraza abierta, cocina cerrada, cuarto y baño de servicio y 2 estacionamientos. Condominio financieramente sano y sin deudas.",
+    considerations:["151 m² construidos — $1,490/m²","Terraza abierta confirmada, edificio de baja densidad (2 unidades por piso)","Actualizado el 20/09/2026","2 estacionamientos, condominio sin deudas — dato favorable para la compra"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/95/34/16/32953416_55afb53abdc14ced2bb77c4d402235cd-def5d64",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/ph-monaco-amplio-3-recamaras-en-obarrio-225k/32953416",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"obarrio-via-espana",
+    building:"Apartamento en Obarrio (cerca de Vía España)",
+    area:"Obarrio",
+    price:240000, beds:3, baths:2.5, parking:2, size_m2:135,
+    maintenance:204,
+    verdict:"Great Find",
+    description:"Apartamento en el corazón bancario de Obarrio, cerca de malls, cafeterías, clínicas y tiendas de lujo. Cuenta con balcón, depósito amplio, ventilación cruzada y línea blanca con aires inverter.",
+    considerations:["135 m² construidos — $1,778/m²","Balcón confirmado, depósito amplio","Actualizado el 20/09/2026","2 estacionamientos, ubicación céntrica en el distrito bancario"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/30/77/16/88/30771688_5e4aa8",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/obarrio-con-hermosa-vista-ciudad-135mts2-3-recamaras-2estac-deposito/30771688",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"obarrio-hotel-sortis",
+    building:"Apartamento en Obarrio (a pasos del Hotel Sortis)",
+    area:"Obarrio",
+    price:299000, beds:3, baths:3.5, parking:2, size_m2:188,
+    maintenance:281,
+    verdict:"Solid Option",
+    description:"Amplio apartamento en Obarrio a pasos del Hotel Sortis, con 3 baños completos, baño social, cocina cerrada remodelada, cuarto y baño de servicio, balcón y 2 parqueos independientes con cargador eléctrico incluido. El edificio cuenta con piscina, gimnasio, salón de eventos, parque infantil y cancha deportiva.",
+    considerations:["188 m² construidos — $1,590/m², remodelado","Balcón confirmado, cargador eléctrico en parqueo","Actualizado el 17/09/2026","2 estacionamientos, precio cerca del límite superior del presupuesto"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/64/77/72/32647772_73e180a",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/venta-obarrio/32647772",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  },
+  {
+    id:CLIENT_PREFIX+"victoria-tower",
+    building:"Victoria Tower",
+    area:"Obarrio",
+    price:300000, beds:3, baths:4.5, parking:2, size_m2:188,
+    maintenance:280.5,
+    verdict:"Solid Option",
+    description:"Apartamento familiar listo para vivir en Calle 54, Obarrio, con planta eléctrica total, sistema de seguridad con reconocimiento facial y 3 amplias recámaras, cada una con su propio baño privado. Sala-comedor con acceso directo al balcón, cuarto y baño de empleada y 2 estacionamientos techados. Área social de 900 m² con piscina y gimnasio.",
+    considerations:["188 m² construidos — $1,596/m², 4.5 baños — el más alto del grupo en esta zona","Balcón confirmado, listo para vivir","Actualizado el 22/09/2026","2 estacionamientos techados, seguridad con reconocimiento facial"],
+    thumbnail:"https://photos.encuentra24.com/t_or_fh_l/f_auto/v1/pa/32/59/14/45/32591445_ba9ed46",
+    listingUrl:"https://www.encuentra24.com/panama-es/bienes-raices-venta-de-propiedades-apartamentos/listo-para-vivir-apartamento-familiar-en-obarrio/32591445",
+    source:"Encuentra24",
+    lastVerified:"2026-09-23"
+  }
+];
+
+const LS_VOTER_KEY = "ptracker_voter_id";
+let voterId = null;
+try{
+  voterId = localStorage.getItem(LS_VOTER_KEY);
+  if(!voterId){ voterId = "v-"+Math.random().toString(36).slice(2,10); localStorage.setItem(LS_VOTER_KEY, voterId); }
+}catch(e){ voterId = "v-"+Math.random().toString(36).slice(2,10); }
+
+let voteCounts = {};
+let myVotes = {};
+
+async function sbFetch(path, opts={}){
+  return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+    ...opts,
+    headers:{
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${SUPABASE_KEY}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+      ...(opts.headers||{})
+    }
+  });
+}
+
+async function loadFavorites(){
+  if(!(SUPABASE_URL && SUPABASE_KEY)) return;
+  try{
+    const res = await sbFetch(`favorites?select=property_id,voter&property_id=like.${encodeURIComponent(CLIENT_PREFIX)}*`);
+    if(!res.ok) throw new Error("HTTP "+res.status);
+    const rows = await res.json();
+    voteCounts = {}; myVotes = {};
+    rows.forEach(r=>{
+      voteCounts[r.property_id] = (voteCounts[r.property_id]||0)+1;
+      if(r.voter === voterId) myVotes[r.property_id] = true;
+    });
+  }catch(e){ console.warn("No se pudieron cargar los favoritos compartidos:", e); }
+}
+
+async function toggleFav(id){
+  const wasFav = !!myVotes[id];
+  if(wasFav){
+    delete myVotes[id];
+    voteCounts[id] = Math.max(0, (voteCounts[id]||1) - 1);
+  } else {
+    myVotes[id] = true;
+    voteCounts[id] = (voteCounts[id]||0) + 1;
+  }
+  render();
+  try{
+    if(wasFav){
+      await sbFetch(`favorites?property_id=eq.${encodeURIComponent(id)}&voter=eq.${encodeURIComponent(voterId)}`, { method:"DELETE" });
+    } else {
+      await sbFetch("favorites", { method:"POST", body: JSON.stringify({ property_id:id, voter:voterId }) });
+    }
+  }catch(e){ console.warn("No se pudo guardar el favorito en la nube:", e); }
+}
+
+function toggleDesc(btn){
+  const desc = btn.previousElementSibling;
+  const clamped = desc.classList.toggle("clamped");
+  btn.textContent = clamped ? "Ver más ›" : "Ver menos";
+}
+
+const verdictClass = { "Great Find":"v-great", "Solid Option":"v-solid", "Fair":"v-fair", "Stretch":"v-stretch" };
+function fmtMoney(n){ return "$"+n.toLocaleString("en-US"); }
+
+function cardHtml(p){
+  const ppm = Math.round(p.price / p.size_m2);
+  const isFav = !!myVotes[p.id];
+  const count = voteCounts[p.id] || 0;
+  const mapLink = `https://www.google.com/maps/search/${encodeURIComponent(p.building+" "+p.area+" Panama")}`;
+  return `
+  <div class="card">
+    <div class="thumb" style="background-image:url('${p.thumbnail}')">
+      <span class="verdict-tag ${verdictClass[p.verdict]||''}">${p.verdict}</span>
+      <button class="fav-btn ${isFav?'on':''}" onclick="toggleFav('${p.id}')" title="Marcar como favorito">${isFav?'♥':'♡'}${count?` ${count}`:''}</button>
+      <span class="source-tag">${p.source}</span>
+    </div>
+    <div class="card-body">
+      <h3>${p.building}</h3>
+      <div class="area">${p.area} · <a href="${mapLink}" target="_blank" rel="noopener">ver mapa</a></div>
+      <div class="price">${fmtMoney(p.price)}<span class="ppm">$${ppm.toLocaleString("en-US")}/m²</span></div>
+      <div class="facts">
+        <span><b>${p.beds}</b> hab</span>
+        <span><b>${p.baths}</b> baños</span>
+        <span><b>${p.parking ?? 'Consultar'}</b> parqueos</span>
+        <span><b>${p.size_m2}</b> m²</span>
+      </div>
+      <div>
+        <p class="desc clamped">${p.description}</p>
+        <button class="desc-toggle" onclick="toggleDesc(this)">Ver más ›</button>
+      </div>
+      ${p.considerations && p.considerations.length ? `
+      <div class="considerations">
+        <b>A tener en cuenta</b>
+        <ul>${p.considerations.map(c=>`<li>${c}</li>`).join("")}</ul>
+      </div>` : ""}
+      ${p.agent === "Isabella Tribaldos" ? `<div class="agent-badge">Contacto: Isabella Tribaldos</div>` : ""}
+      ${p.maintenance ? `<div class="maint">Mantenimiento: $${p.maintenance}/mes</div>` : ""}
+      <div class="card-foot">
+        <span class="ref-badge">Ref: ${p.id.replace(CLIENT_PREFIX,"")}</span>
+        <span class="updated">verificado ${p.lastVerified}</span>
+      </div>
+    </div>
+  </div>`;
+}
+
+function populateSelectOptions(){
+  const areas = [...new Set(PROPERTIES.map(p=>p.area))].sort((a,b)=>ZONE_ORDER.indexOf(a)-ZONE_ORDER.indexOf(b));
+  const areaSel = document.getElementById("f-area");
+  areas.forEach(a=>{
+    const opt = document.createElement("option");
+    opt.value = a; opt.textContent = a;
+    areaSel.appendChild(opt);
+  });
+  const buildings = [...new Set(PROPERTIES.map(p=>p.building))].sort();
+  const buildSel = document.getElementById("f-building");
+  buildings.forEach(b=>{
+    const opt = document.createElement("option");
+    opt.value = b; opt.textContent = b;
+    buildSel.appendChild(opt);
+  });
+}
+
+function currentFilters(){
+  return {
+    search: document.getElementById("f-search").value.trim().toLowerCase(),
+    area: document.getElementById("f-area").value,
+    price: document.getElementById("f-price").value,
+    beds: document.getElementById("f-beds").value,
+    verdict: document.getElementById("f-verdict").value,
+    building: document.getElementById("f-building").value,
+    show: document.getElementById("f-show").value,
+    sort: document.getElementById("f-sort").value
+  };
+}
+
+function sortList(list, sort){
+  if(sort === "price-asc") list.sort((a,b)=>a.price-b.price);
+  else if(sort === "price-desc") list.sort((a,b)=>b.price-a.price);
+  else if(sort === "size-desc") list.sort((a,b)=>b.size_m2-a.size_m2);
+  else if(sort === "name-asc") list.sort((a,b)=>a.building.localeCompare(b.building));
+  return list;
+}
+
+function render(){
+  const f = currentFilters();
+  let list = PROPERTIES.filter(p=>{
+    if(f.search){
+      const hay = (p.building+" "+p.area+" "+p.description).toLowerCase();
+      if(!hay.includes(f.search)) return false;
+    }
+    if(f.area && p.area !== f.area) return false;
+    if(f.building && p.building !== f.building) return false;
+    if(f.verdict && p.verdict !== f.verdict) return false;
+    if(f.beds){
+      if(p.beds < Number(f.beds)) return false;
+    }
+    if(f.price){
+      const [lo,hi] = f.price.split("-").map(Number);
+      if(p.price<lo || p.price>hi) return false;
+    }
+    if(f.show === "loved" && !(voteCounts[p.id] > 0)) return false;
+    return true;
+  });
+
+  const zonesEl = document.getElementById("zones");
+  const empty = document.getElementById("empty");
+
+  const zonesToShow = f.area ? [f.area] : ZONE_ORDER;
+  let html = "";
+  let shownCount = 0;
+  zonesToShow.forEach(zone=>{
+    const zoneList = sortList(list.filter(p=>p.area===zone), f.sort);
+    if(zoneList.length === 0) return;
+    shownCount += zoneList.length;
+    html += `
+      <div class="zone-block">
+        <div class="sec-head"><h2>${zone}</h2><span class="meta">${zoneList.length} propiedad${zoneList.length===1?"":"es"}</span><div class="rule"></div></div>
+        <div class="grid">${zoneList.map(cardHtml).join("")}</div>
+      </div>`;
+  });
+
+  zonesEl.innerHTML = html;
+  empty.hidden = shownCount>0;
+
+  const favCount = Object.values(voteCounts).filter(c=>c>0).length;
+  document.getElementById("stats").innerHTML = `
+    <div class="stat"><div class="n">${PROPERTIES.length}</div><div class="l">PROPIEDADES</div></div>
+    <div class="stat"><div class="n">${favCount}</div><div class="l">❤ CON FAVORITOS</div></div>
+  `;
+}
+
+document.querySelectorAll("#f-search,#f-area,#f-price,#f-beds,#f-verdict,#f-building,#f-show,#f-sort").forEach(el=>{
+  el.addEventListener(el.tagName==="INPUT" ? "input" : "change", render);
+});
+document.getElementById("clear").addEventListener("click", ()=>{
+  document.getElementById("f-search").value="";
+  document.getElementById("f-area").value="";
+  document.getElementById("f-price").value="";
+  document.getElementById("f-beds").value="";
+  document.getElementById("f-verdict").value="";
+  document.getElementById("f-building").value="";
+  document.getElementById("f-show").value="all";
+  document.getElementById("f-sort").value="price-asc";
+  render();
+});
+
+(async function init(){
+  populateSelectOptions();
+  await loadFavorites();
+  render();
+})();
+</script>
+</body>
+</html>
